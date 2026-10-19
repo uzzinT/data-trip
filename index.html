@@ -250,23 +250,54 @@ const STORY = {
    관광지 crowd: [오전, 오후] / 식당 crowd: [점심, 저녁], stairs: 0 평지 1 조금 2 많음
    fake: 리뷰 수가 적고 같은 날 몰린 광고성 리뷰 (검증 함정) */
 const PLACES = [
-  {id:'s1',type:'sight',name:'가람 역사박물관',dong:'하늘동',x:8,y:5,indoor:true,stairs:0,price:0,rating:4.4,reviews:1240,crowd:[30,55],tags:['역사','아이'],desc:'가람시 2천 년 역사를 보여 주는 박물관. 엘리베이터가 있어요.'},
-  {id:'s2',type:'sight',name:'산마루 성곽길',dong:'산마루동',x:20,y:2.5,indoor:false,stairs:2,price:0,rating:4.7,reviews:2380,crowd:[40,60],tags:['역사','경치','사진'],desc:'옛 성벽을 따라 걷는 산길. 경치가 좋지만 돌계단이 이어져요.'},
-  {id:'s3',type:'sight',name:'강변 생태공원',dong:'강변동',x:4.5,y:10,indoor:false,stairs:0,price:0,rating:4.3,reviews:980,crowd:[25,45],tags:['자연','아이','산책'],desc:'강을 따라 평평한 산책로와 놀이터가 있는 공원.'},
-  {id:'s4',type:'sight',name:'바다 해양과학관',dong:'바다동',x:19,y:12,indoor:true,stairs:0,price:8000,rating:4.5,reviews:1650,crowd:[45,90],tags:['바다','아이','체험'],desc:'바다 생물 수조와 체험관이 있는 실내 과학관.'},
-  {id:'s5',type:'sight',name:'하늘 전망대',dong:'하늘동',x:3.5,y:2.8,indoor:true,stairs:1,price:12000,rating:4.6,reviews:3100,crowd:[20,60],tags:['경치','사진'],desc:'도시가 한눈에 보이는 실내 전망대. 엘리베이터에서 내려 계단을 조금 올라요.'},
-  {id:'s6',type:'sight',name:'갯벌 체험장',dong:'바다동',x:22,y:13.6,indoor:false,stairs:0,price:10000,rating:4.2,reviews:420,crowd:[30,50],tags:['바다','아이','체험'],desc:'장화를 신고 갯벌 생물을 관찰하는 야외 체험장.'},
-  {id:'s7',type:'sight',name:'산마루 한옥마을',dong:'산마루동',x:16,y:4.2,indoor:false,stairs:1,price:0,rating:4.5,reviews:1980,crowd:[30,85],tags:['역사','전통','사진'],desc:'전통 한옥 골목. 완만한 오르막이 조금 있어요.'},
+  {id:'s1',type:'sight',name:'가람 역사박물관',dong:'하늘동',x:8,y:5,indoor:true,stairs:0,price:0,rating:4.4,reviews:1240,crowd:[30,55],tags:['역사','아이'],desc:'가람시 2천 년 역사를 보여 주는 박물관. 엘리베이터가 있어요.',
+   say:[[5,'엘리베이터가 있어서 할머니 모시고 편하게 봤어요.'],[4,'비 오는 날 가기 딱 좋아요. 아이 체험 코너도 있어요.'],[2,'전시가 몇 년째 그대로예요. 새로운 게 없어요.']]},
+  {id:'s2',type:'sight',name:'산마루 성곽길',dong:'산마루동',x:20,y:2.5,indoor:false,stairs:2,price:0,rating:4.7,reviews:2380,crowd:[40,60],tags:['역사','경치','사진'],desc:'옛 성벽을 따라 걷는 산길. 경치가 좋지만 돌계단이 이어져요.',
+   say:[[5,'정상에서 보는 도시 풍경이 최고! 사진 맛집이에요.'],[2,'돌계단이 끝도 없어요. 무릎 안 좋으신 분은 비추.'],[4,'그늘이 거의 없으니 한여름 낮엔 피하세요.']]},
+  {id:'s3',type:'sight',name:'강변 생태공원',dong:'강변동',x:4.5,y:10,indoor:false,stairs:0,price:0,rating:4.3,reviews:980,crowd:[25,45],tags:['자연','아이','산책'],desc:'강을 따라 평평한 산책로와 놀이터가 있는 공원.',
+   say:[[5,'평지라 유모차 끌고 산책하기 좋아요.'],[3,'비 온 다음 날엔 길이 질척거려요.'],[4,'놀이터가 넓어서 아이들이 한참 놀았어요.']]},
+  {id:'s4',type:'sight',name:'바다 해양과학관',dong:'바다동',x:19,y:12,indoor:true,stairs:0,price:8000,rating:4.5,reviews:1650,crowd:[45,90],tags:['바다','아이','체험'],desc:'바다 생물 수조와 체험관이 있는 실내 과학관.',
+   say:[[5,'수조 터널이 정말 멋져요. 아이들이 눈을 못 떼요.'],[1,'주말 오후엔 사람에 떠밀려 다녀요. 꼭 오전에 가세요.'],[4,'실내라 날씨 상관없이 좋아요.']]},
+  {id:'s5',type:'sight',name:'하늘 전망대',dong:'하늘동',x:3.5,y:2.8,indoor:true,stairs:1,price:12000,rating:4.6,reviews:3100,crowd:[20,60],tags:['경치','사진'],desc:'도시가 한눈에 보이는 실내 전망대. 엘리베이터에서 내려 계단을 조금 올라요.',
+   say:[[5,'유리창 너머로 가람시가 한눈에! 비 오는 날도 운치 있어요.'],[3,'엘리베이터에서 내려 계단을 조금 올라가야 해요.'],[2,'입장료에 비해 볼 게 적어요.']]},
+  {id:'s6',type:'sight',name:'갯벌 체험장',dong:'바다동',x:22,y:13.6,indoor:false,stairs:0,price:10000,rating:3.8,reviews:420,crowd:[30,50],tags:['바다','아이','체험'],desc:'장화를 신고 갯벌 생물을 관찰하는 야외 체험장.',
+   say:[[5,'아이들이 게랑 조개 잡으면서 신났어요.'],[2,'그늘이 하나도 없어서 한낮엔 너무 더워요.'],[4,'장화를 빌려줘서 편했어요. 갈아입을 옷 챙기세요.'],[2,'물때를 잘못 맞춰 가서 갯벌이 거의 안 보였어요.']]},
+  {id:'s7',type:'sight',name:'산마루 한옥마을',dong:'산마루동',x:16,y:4.2,indoor:false,stairs:1,price:0,rating:4.5,reviews:1980,crowd:[30,85],tags:['역사','전통','사진'],desc:'전통 한옥 골목. 완만한 오르막이 조금 있어요.',
+   say:[[5,'아침 일찍 가면 한적하고 사진이 예뻐요.'],[1,'오후엔 관광버스가 몰려서 걷기도 힘들어요.'],[4,'오르막이 조금 있지만 천천히 걸으면 괜찮아요.']]},
   {id:'s8',type:'sight',name:'인생샷 비밀정원',dong:'강변동',x:9,y:13.6,indoor:false,stairs:0,price:5000,rating:4.9,reviews:9,crowd:[20,25],tags:['사진','경치','아이'],desc:'요즘 SNS에서 뜨는 꽃 정원이라고 해요.',fake:true},
-  {id:'f1',type:'food',name:'할매 손두부집',dong:'산마루동',x:14.2,y:2.6,indoor:true,stairs:0,price:9000,rating:4.6,reviews:1520,crowd:[70,40],tags:['한식','부드러움','비건'],desc:'매일 아침 직접 만드는 순두부와 두부 정식.'},
-  {id:'f2',type:'food',name:'바다 횟집',dong:'바다동',x:21,y:9.8,indoor:true,stairs:0,price:25000,rating:4.4,reviews:2040,crowd:[60,85],tags:['해산물','바다'],desc:'바다가 보이는 회·해물탕 집.'},
-  {id:'f3',type:'food',name:'가람 국밥',dong:'하늘동',x:10.6,y:6.2,indoor:true,stairs:0,price:8000,rating:4.2,reviews:3400,crowd:[90,50],tags:['한식','부드러움'],desc:'가람역 앞 오래된 국밥집. 점심엔 직장인이 몰려요.'},
-  {id:'f4',type:'food',name:'초록 비건 키친',dong:'강변동',x:6.8,y:9.4,indoor:true,stairs:0,price:13000,rating:4.5,reviews:610,crowd:[45,40],tags:['비건','양식'],desc:'채소와 곡물로만 만드는 비건 식당.'},
-  {id:'f5',type:'food',name:'키즈 패밀리 식당',dong:'바다동',x:16.6,y:11.4,indoor:true,stairs:0,price:15000,rating:4.1,reviews:870,crowd:[55,60],tags:['아이','양식'],desc:'놀이방이 있는 가족 식당. 어린이 메뉴가 있어요.'},
-  {id:'f6',type:'food',name:'루프탑 야경 식당',dong:'하늘동',x:5.8,y:5.6,indoor:false,stairs:2,price:28000,rating:4.6,reviews:1100,crowd:[30,70],tags:['야경','경치','양식','비건'],desc:'건물 옥상 야외 테라스 식당. 계단으로 4층까지 올라가요. 비건 메뉴 있음.'},
+  {id:'f1',type:'food',name:'할매 손두부집',dong:'산마루동',x:14.2,y:2.6,indoor:true,stairs:0,price:9000,rating:4.6,reviews:1520,crowd:[70,40],tags:['한식','부드러움','비건'],desc:'매일 아침 직접 만드는 순두부와 두부 정식.',
+   say:[[5,'순두부가 부드러워서 어르신들이 좋아하세요.'],[4,'고기 없는 두부 정식이 있어서 비건 친구랑 갔어요.'],[2,'점심엔 줄이 너무 길어요.']]},
+  {id:'f2',type:'food',name:'바다 횟집',dong:'바다동',x:21,y:9.8,indoor:true,stairs:0,price:25000,rating:4.4,reviews:2040,crowd:[60,85],tags:['해산물','바다'],desc:'바다가 보이는 회·해물탕 집.',
+   say:[[5,'창밖으로 바다 보면서 먹는 회, 최고예요.'],[2,'저녁엔 단체 손님이 많아 너무 시끄러워요.'],[3,'해산물 말고는 먹을 메뉴가 거의 없어요.']]},
+  {id:'f3',type:'food',name:'가람 국밥',dong:'하늘동',x:10.6,y:6.2,indoor:true,stairs:0,price:8000,rating:3.9,reviews:3400,crowd:[90,50],tags:['한식','부드러움'],desc:'가람역 앞 오래된 국밥집. 점심엔 직장인이 몰려요.',
+   say:[[4,'국물이 부드럽고 진해서 속이 편해요.'],[1,'점심엔 직장인 줄이 가게 밖까지 서요.'],[4,'저녁엔 한산해서 금방 먹었어요.'],[2,'테이블이 좁고 오래돼서 불편해요.']]},
+  {id:'f4',type:'food',name:'초록 비건 키친',dong:'강변동',x:6.8,y:9.4,indoor:true,stairs:0,price:13000,rating:4.5,reviews:610,crowd:[45,40],tags:['비건','양식'],desc:'채소와 곡물로만 만드는 비건 식당.',
+   say:[[5,'고기 없이도 이렇게 맛있다니! 비건 친구에게 강추.'],[3,'양이 조금 적어요.'],[4,'창밖으로 강이 보여서 분위기가 좋아요.']]},
+  {id:'f5',type:'food',name:'키즈 패밀리 식당',dong:'바다동',x:16.6,y:11.4,indoor:true,stairs:0,price:15000,rating:3.6,reviews:870,crowd:[55,60],tags:['아이','양식'],desc:'놀이방이 있는 가족 식당. 어린이 메뉴가 있어요.',
+   say:[[5,'놀이방 덕분에 부모도 편하게 먹었어요.'],[3,'맛은 평범해요. 아이들 위주 메뉴예요.'],[2,'아이들이 뛰어다녀서 조용히 먹긴 힘들어요.'],[2,'가격에 비해 양이 적어요.']]},
+  {id:'f6',type:'food',name:'루프탑 야경 식당',dong:'하늘동',x:5.8,y:5.6,indoor:false,stairs:2,price:28000,rating:4.6,reviews:1100,crowd:[30,70],tags:['야경','경치','양식','비건'],desc:'건물 옥상 야외 테라스 식당. 계단으로 4층까지 올라가요. 비건 메뉴 있음.',
+   say:[[5,'해 질 녘부터 야경까지, 분위기 최고예요.'],[2,'엘리베이터 없이 4층 계단이라 힘들었어요.'],[3,'야외라 비 오면 앉을 자리가 없어요.'],[4,'비건 파스타가 있어서 좋았어요.']]},
   {id:'f7',type:'food',name:'SNS 화제 빙수카페',dong:'강변동',x:11,y:10.6,indoor:true,stairs:0,price:9000,rating:5.0,reviews:6,crowd:[35,30],tags:['사진','비건','아이','부드러움'],desc:'사진이 예쁘기로 소문난 카페라고 해요.',fake:true},
-  {id:'f8',type:'food',name:'계단 위 국수집',dong:'산마루동',x:18.6,y:5.6,indoor:true,stairs:2,price:7000,rating:4.7,reviews:890,crowd:[65,35],tags:['한식','경치'],desc:'계단 120개를 올라가야 나오는 산꼭대기 국수집.'}
+  {id:'f8',type:'food',name:'계단 위 국수집',dong:'산마루동',x:18.6,y:5.6,indoor:true,stairs:2,price:7000,rating:4.7,reviews:890,crowd:[65,35],tags:['한식','경치'],desc:'계단 120개를 올라가야 나오는 산꼭대기 국수집.',
+   say:[[5,'산꼭대기에서 먹는 국수 맛이 꿀맛!'],[1,'계단 120개… 다리가 후들거려요.'],[4,'멸치 육수가 진해요.']]}
 ];
+
+/* 공통 리뷰 (장소별 say 리뷰에 섞임). good = 4~5점, mid = 3점, bad = 1~2점
+   fake = 광고성 리뷰: 리뷰를 1개만 쓴 계정들이 사흘 사이에 몰아서 씀 (fakeDates 순서대로) */
+const REVIEWS = {
+  sight:{
+    good:['생각보다 볼거리가 많아서 두 시간이 금방 갔어요.','설명판이 잘 되어 있어서 아이들도 이해하기 쉬웠어요.','해 질 녘에 가면 사진이 정말 예쁘게 나와요.','부모님 모시고 갔는데 다들 만족하셨어요.','입구 직원분이 길을 친절하게 알려 주셨어요.','두 번째 방문인데 계절마다 느낌이 달라요.'],
+    mid:['나쁘지 않았지만 기대만큼은 아니었어요.','주말이라 사람이 많아서 제대로 못 봤어요.','주차 공간이 좁아서 한참 돌았어요.','안내 표지판이 부족해서 조금 헤맸어요.'],
+    bad:['공사 중인 곳이 많아서 절반도 못 봤어요. 돈이 아까워요.','화장실이 너무 지저분했어요.','한 시간 줄 서서 들어갔는데 10분이면 다 봐요.','직원이 불친절해서 기분이 상했어요.']
+  },
+  food:{
+    good:['반찬 하나하나가 정성스러워요. 또 올게요.','사장님이 친절하시고 양도 넉넉해요.','가격 생각하면 정말 훌륭한 한 끼였어요.','아이 의자가 있어서 편하게 먹었어요.','재료가 신선한 게 느껴져요.','혼밥하기에도 편한 분위기예요.'],
+    mid:['맛은 괜찮은데 조금 짰어요.','음식은 무난한데 가격이 조금 올랐네요.','직원분이 바빠서 주문이 늦게 나왔어요.','맛있지만 일부러 찾아갈 정도는 아니에요.'],
+    bad:['머리카락이 나왔는데 사과도 없었어요. 다시는 안 가요.','예전 맛이 아니에요. 너무 실망했어요.','한참 기다렸는데 음식이 식어서 나왔어요.','계산이 잘못됐는데 확인도 안 해 주셨어요.']
+  },
+  fake:[[5,'여기 진짜 최고예요!! 강추👍👍'],[5,'인생샷 무조건 여기!! 강추👍'],[5,'#협찬 분위기 최고 강추👍'],[5,'완전 최고!! 무조건 가세요 강추👍'],[5,'사진 맛집!! 최고예요 강추👍'],[5,'#체험단 사진 너무 잘 나와요 강추👍'],[5,'분위기 미쳤어요 무조건 가세요👍'],[5,'친구 추천으로 왔는데 최고!! 강추👍'],[4,'괜찮아요 사진 예뻐요']],
+  fakeDates:['2026.10.13','2026.10.13','2026.10.12','2026.10.12','2026.10.12','2026.10.12','2026.10.11','2026.10.11','2026.10.11']
+};
 
 /* 의뢰인. weather = 여행 날 [오전, 점심, 오후, 저녁] 기상청 단기예보 (가상 값)
    rain = 강수확률(%), feel = 체감온도(℃). 강수확률 60% 이상이거나 체감온도 33℃ 이상이면 실외는 감점 */
@@ -375,7 +406,7 @@ function evaluate(c,plan){
 
   P.forEach((p,i)=>{if(p.fake) notes[i].push('😑 사진과 완전히 달라요. 리뷰를 믿었는데….');});
   const ff=P.filter(p=>p.fake);
-  add('verify','검증',!ff.length,ff.map(p=>`${p.name}: 리뷰 ${p.reviews}개가 모두 같은 날 올라온 광고성 리뷰`).join(' / ')||'검증되지 않은 장소는 고르지 않았어요.');
+  add('verify','검증',!ff.length,ff.map(p=>`${p.name}: 리뷰 ${p.reviews}개가 모두 사흘 사이에 몰려 올라온 광고성 리뷰`).join(' / ')||'검증되지 않은 장소는 고르지 않았어요.');
 
   P.forEach((p,i)=>{if(!notes[i].length) notes[i].push(p.tags.some(t=>c.interest.some(q=>q.tags.includes(t)))?'😊 정말 좋았어요!':p.type==='food'?'😋 맛있게 잘 먹었어요.':'🙂 무난했어요.');});
   return {crit,notes,cost,km,fake:ff.length>0,score:crit.reduce((s,k)=>s+k.pts,0)};
@@ -449,19 +480,20 @@ function label(ctx,t,x,y,col,bold){
 
 /* ---------- 리뷰 원자료 (같은 장소는 항상 같은 리뷰) ---------- */
 function rng(seed){let s=seed;return()=>(s=(s*9301+49297)%233280)/233280;}
-const POOL={
-  sight:['생각보다 볼거리가 많았어요.','주차가 조금 불편했어요.','아이들이 좋아했어요.','사람 많을 땐 오전에 가세요.','설명이 잘 되어 있어요.','사진 찍기 좋아요.','한 번쯤 가 볼 만해요.','기대보다는 평범했어요.'],
-  food:['양이 넉넉해요.','점심엔 줄이 길어요.','직원분들이 친절해요.','가격 대비 괜찮아요.','맛이 깔끔해요.','조금 짰어요.','또 오고 싶어요.','메뉴가 다양해요.'],
-  fake:['여기 진짜 최고예요!! 강추👍👍','인생샷 무조건 여기!! 강추👍','#협찬 #광고 분위기 최고 강추👍','완전 최고!! 무조건 가세요 강추👍','친구가 사장님인데 진짜 좋아요 강추👍','사진 맛집!! 최고예요 강추👍']
-};
+/* 실제 장소: 장소별 리뷰(say) + 아래 공통 리뷰를 평점에 맞게 섞어 8개.
+   평점이 낮을수록 나쁜 리뷰가 많이 섞임. 같은 장소는 항상 같은 리뷰 */
 function reviewsOf(p){
   const r=rng([...p.id].reduce((s,c)=>s*31+c.charCodeAt(0),7)%233280);
-  return Array.from({length:6},(_,i)=>{
-    if(p.fake) return {d:'2026.10.12',star:5,t:POOL.fake[i]};
-    const y=2024+Math.floor(r()*3),m=1+Math.floor(r()*12),d=1+Math.floor(r()*28);
-    const star=Math.max(1,Math.min(5,Math.round(p.rating+(r()-.5)*2.2)));
-    return {d:`${y}.${String(m).padStart(2,'0')}.${String(d).padStart(2,'0')}`,star,t:POOL[p.type][Math.floor(r()*8)]};
-  }).sort((a,b)=>b.d.localeCompare(a.d));
+  if(p.fake) return REVIEWS.fake.slice(0,p.reviews).map(([star,t],i)=>({star,t,d:REVIEWS.fakeDates[i],n:1}));
+  const L=(p.say||[]).map(([star,t])=>({star,t})), low=(5-p.rating)*0.25;
+  for(let k=0;L.length<8&&k<200;k++){
+    const x=r(), mood=x<low?'bad':x<low+0.2?'mid':'good', pool=REVIEWS[p.type][mood], t=pool[Math.floor(r()*pool.length)];
+    if(!L.some(v=>v.t===t)) L.push({t,star:mood==='bad'?1+Math.floor(r()*2):mood==='mid'?3:4+Math.floor(r()*2)});
+  }
+  // 작성일: 2026.10.18부터 최대 약 2년 반 전까지
+  return L.map(v=>{const t=new Date(2026,9,18-Math.floor(r()*900));
+    return {...v,n:2+Math.floor(r()*240),d:`${t.getFullYear()}.${String(t.getMonth()+1).padStart(2,'0')}.${String(t.getDate()).padStart(2,'0')}`};})
+    .sort((a,b)=>b.d.localeCompare(a.d));
 }
 
 /* ---------- 계획 화면 ---------- */
@@ -582,8 +614,8 @@ function openModal(html,onBind){
 }
 function openReviews(p){
   openModal(`<h3>${p.name} · 리뷰 원자료</h3>
-    <p class="muted" style="font-size:13px">전체 ${p.reviews.toLocaleString()}개 중 최근 6개 · 작성일과 내용을 살펴보세요.</p>
-    <div>${reviewsOf(p).map(r=>`<div class="rv"><span class="m">${r.d} · ${'★'.repeat(r.star)}${'☆'.repeat(5-r.star)}</span><span>${r.t}</span></div>`).join('')}</div>
+    <p class="muted" style="font-size:13px">${p.fake?`전체 ${p.reviews}개`:`전체 ${p.reviews.toLocaleString()}개 중 최근 8개`} · 작성일, 작성자, 내용을 살펴보세요.</p>
+    <div>${reviewsOf(p).map(r=>`<div class="rv"><span class="m">${r.d} · 작성자 리뷰 ${r.n}개 · <span class="${r.star<=2?'no':''}">${'★'.repeat(r.star)}${'☆'.repeat(5-r.star)}</span></span><span>${r.t}</span></div>`).join('')}</div>
     <div class="row"><button class="btn" data-focus id="mc">닫기</button></div>`,close=>$('#mc').onclick=close);
 }
 function openPrivacy(){
@@ -712,15 +744,33 @@ function renderFinal(){
     <div class="card">
       <h3>나의 생각 모음</h3>
       ${CLIENTS.map((c,i)=>`<div><p class="muted" style="font-size:13px">${i+1}. ${c.think}</p><p>${esc(S.notes[i]||'(쓰지 않음)')}</p></div>`).join('')}
-      <div class="row"><button class="btn" id="copy">내 기록 복사하기</button><span id="copied" class="ok" aria-live="polite"></span><button class="btn ghost" id="home">처음 화면으로</button></div>
+      <div class="row"><button class="btn" id="copy">내 기록 복사하기</button><button class="btn" id="img">보고서를 이미지로 저장</button><span id="copied" class="ok" aria-live="polite"></span><button class="btn ghost" id="home">처음 화면으로</button></div>
+      <div id="img-out"></div>
     </div>`;
   show('sc-final');
   const ft=$('#final-talk span'); $('#final-talk').onclick=()=>finishType(ft); typeText(ft,STORY.final);
+  $('#img').onclick=saveReportImage;
   $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(reportText());$('#copied').textContent='복사했어요!';}
     catch{openModal(`<h3>아래 글을 복사하세요</h3><textarea style="min-height:200px">${esc(reportText())}</textarea><div class="row"><button class="btn" id="mc">닫기</button></div>`,close=>$('#mc').onclick=close);}};
   $('#home').onclick=()=>openModal(`<h3>정말 처음 화면으로 가시겠습니까?</h3><p>지금까지의 기록이 사라져요.</p>
     <div class="row"><button class="btn" data-focus id="hn">머물게요</button><button class="btn ghost" id="hy">처음으로</button></div>`,
     close=>{$('#hn').onclick=close;$('#hy').onclick=()=>{close();location.reload();};});
+}
+
+/* 최종 보고서를 PNG로 저장 (html2canvas는 누를 때만 불러옴). 내려받기가 막힌 환경이면 화면에 띄운 이미지를 직접 저장 */
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});}
+async function saveReportImage(){
+  const msg=$('#copied'),btn=$('#img');btn.disabled=true;msg.textContent='이미지를 만드는 중…';
+  try{
+    if(!window.html2canvas) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    $('#img-out').innerHTML='';finishType($('#final-talk span'));
+    const cnv=await html2canvas($('#sc-final'),{backgroundColor:'#f5efe4',scale:2,ignoreElements:el=>el.tagName==='BUTTON'||el.id==='img-out'||el.id==='copied'});
+    const url=cnv.toDataURL('image/png'),a=document.createElement('a');
+    a.href=url;a.download=`데이터여행사_보고서_${S.name}.png`;document.body.appendChild(a);a.click();a.remove();
+    $('#img-out').innerHTML=`<p class="muted" style="font-size:13px">파일이 내려받아지지 않았다면 아래 이미지를 마우스 오른쪽 버튼(휴대폰은 길게 누르기)으로 저장하세요.</p><img alt="최종 보고서 이미지" src="${url}" style="display:block;max-width:100%;border:1px solid var(--line);border-radius:10px;margin-top:8px">`;
+    msg.textContent='저장했어요!';
+  }catch(e){msg.textContent='이미지를 만들지 못했어요. 인터넷 연결을 확인하거나 화면을 캡처해 주세요.';}
+  btn.disabled=false;
 }
 
 /* ---------- 시작 ---------- */
