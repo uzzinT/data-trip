@@ -62,7 +62,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .face{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:24px;background:#dbe9f7;border:2px solid var(--sight)}
 .bubble{background:#fff;border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:10px 14px}
 .bubble .who{font-size:12px;font-weight:700;color:var(--sight)}
-.tip{border-left:4px solid var(--sight);background:#eef4fb;border-radius:8px;padding:8px 12px;font-size:14px}
+.tip{border-left:4px solid var(--sight);background:#eef4fb;border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer;min-height:2.6em}
+/* 타자 중 깜박이는 커서 */
+.typing span::after{content:'▌';color:var(--sight);animation:blink .8s steps(1) infinite;margin-left:1px}
+@keyframes blink{50%{opacity:0}}
 .tip.warn{border-color:var(--alert);background:#fbeceb}
 
 /* 계획 화면 */
@@ -163,7 +166,7 @@ textarea{width:100%;min-height:76px;background:#fff;border:1px solid var(--line)
 <section id="sc-intro" class="card" hidden>
   <p class="eyebrow">첫 출근</p>
   <div id="intro" style="display:grid;gap:10px"></div>
-  <div class="row"><button class="btn" id="go2">첫 의뢰 받기</button></div>
+  <div class="row"><button class="btn ghost" id="skip-intro">건너뛰기 ⏭</button><button class="btn" id="go2">첫 의뢰 받기</button></div>
 </section>
 
 <!-- 계획 -->
@@ -468,7 +471,20 @@ function startClient(i){
   setTip(i===0?'의뢰서를 읽고, 날씨 데이터와 장소 데이터를 보면서 네 칸을 채워 보세요. 지도의 장소를 누르면 데이터가 나와요.':'새 의뢰가 들어왔어요! 이번 의뢰인의 조건은 무엇이 다를까요?');
   show('sc-plan');renderPlan();
 }
-function setTip(t,warn){const e=$('#tip');e.textContent='🤖 나래: '+t;e.className='tip'+(warn?' warn':'');}
+/* 타자기 효과: 한 글자씩. 말풍선을 누르거나 「건너뛰기」를 누르면 바로 전체가 보임 */
+const TYPE_MS=22;
+function typeText(el,text,instant){
+  finishType(el);
+  return new Promise(res=>{
+    let id=0,i=0;
+    const done=()=>{clearInterval(id);el.textContent=text;el._fin=null;el.closest('.typing')?.classList.remove('typing');res();};
+    if(instant) return done();
+    el.textContent='';el._fin=done;
+    id=setInterval(()=>{el.textContent=text.slice(0,++i);if(i>=text.length)done();},TYPE_MS);
+  });
+}
+function finishType(el){el&&el._fin&&el._fin();}
+function setTip(t,warn){const e=$('#tip');e.className='tip'+(warn?' warn':'');typeText(e,'🤖 나래: '+t);}
 function renderPlan(){
   const c=CLIENTS[S.ci];
   $('#client').innerHTML=`
@@ -684,7 +700,7 @@ function renderFinal(){
         ${CLIENTS.map((c,i)=>{const r=S.results[i]||{};return `<tr><td>${c.emoji} ${c.name}</td><td class="mono">${r.score??'-'}</td><td>${'★'.repeat(r.stars||0)}${'☆'.repeat(3-(r.stars||0))}</td><td>${r.priv?'<span class="no">열어 봄</span>':'<span class="ok">지킴</span>'}</td><td>${r.ai?'사용':'-'}</td></tr>`;}).join('')}
       </tbody></table></div>
     </div>
-    <div class="card talk"><div class="face" aria-hidden="true">🤖</div><div class="bubble"><div class="who">나래</div>${STORY.final}</div></div>
+    <div class="card talk"><div class="face" aria-hidden="true">🤖</div><div class="bubble typing" id="final-talk" title="누르면 바로 보기"><div class="who">나래</div><span></span></div></div>
     <div class="card">
       <h3>빅데이터, 이렇게 겪었어요</h3>
       <div class="dik">
@@ -699,6 +715,7 @@ function renderFinal(){
       <div class="row"><button class="btn" id="copy">내 기록 복사하기</button><span id="copied" class="ok" aria-live="polite"></span><button class="btn ghost" id="home">처음 화면으로</button></div>
     </div>`;
   show('sc-final');
+  const ft=$('#final-talk span'); $('#final-talk').onclick=()=>finishType(ft); typeText(ft,STORY.final);
   $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(reportText());$('#copied').textContent='복사했어요!';}
     catch{openModal(`<h3>아래 글을 복사하세요</h3><textarea style="min-height:200px">${esc(reportText())}</textarea><div class="row"><button class="btn" id="mc">닫기</button></div>`,close=>$('#mc').onclick=close);}};
   $('#home').onclick=()=>openModal(`<h3>정말 처음 화면으로 가시겠습니까?</h3><p>지금까지의 기록이 사라져요.</p>
@@ -708,11 +725,22 @@ function renderFinal(){
 
 /* ---------- 시작 ---------- */
 mapCtx=setupCanvas($('#map')); simCtx=setupCanvas($('#simc'));
-$('#go').onclick=()=>{
+let skipIntro=false;
+$('#go').onclick=async()=>{
   S.name=$('#nm').value.trim()||'정유진';
-  $('#intro').innerHTML=STORY.intro.map(t=>`<div class="talk"><div class="face" aria-hidden="true">🤖</div><div class="bubble"><div class="who">나래</div>${esc(t.replace('{name}',S.name))}</div></div>`).join('');
-  show('sc-intro');$('#go2').focus();
+  $('#intro').innerHTML='';skipIntro=false;$('#skip-intro').hidden=false;
+  show('sc-intro');$('#skip-intro').focus();
+  for(const t of STORY.intro){
+    const d=document.createElement('div');d.className='talk';
+    d.innerHTML='<div class="face" aria-hidden="true">🤖</div><div class="bubble typing"><div class="who">나래</div><span></span></div>';
+    $('#intro').appendChild(d);
+    const sp=d.querySelector('span');
+    d.querySelector('.bubble').onclick=()=>finishType(sp);
+    await typeText(sp,t.replace('{name}',S.name),skipIntro);
+  }
+  $('#skip-intro').hidden=true;$('#go2').focus();
 };
+$('#skip-intro').onclick=()=>{skipIntro=true;document.querySelectorAll('#intro span').forEach(finishType);};
 $('#nm').onkeydown=e=>{if(e.key==='Enter')$('#go').click();};
 $('#go2').onclick=()=>startClient(0);
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
@@ -720,6 +748,7 @@ document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
   ['map','table','weather'].forEach(t=>$('#tab-'+t).hidden=t!==b.dataset.tab);
 });
 $('#sort').onchange=e=>{S.sort=e.target.value;renderTable();};
+$('#tip').onclick=()=>finishType($('#tip'));
 $('#map').onclick=e=>{
   const r=e.currentTarget.getBoundingClientRect(), x=(e.clientX-r.left)/r.width*960, y=(e.clientY-r.top)/r.height*600;
   let best=null,bd=28; PLACES.forEach(p=>{const d=Math.hypot(p.x*CELL-x,p.y*CELL-y);if(d<bd){bd=d;best=p;}});
