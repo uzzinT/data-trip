@@ -279,7 +279,14 @@ const PLACES = [
    say:[[5,'해 질 녘부터 야경까지, 분위기 최고예요.'],[2,'엘리베이터 없이 4층 계단이라 힘들었어요.'],[3,'야외라 비 오면 앉을 자리가 없어요.'],[4,'비건 파스타가 있어서 좋았어요.']]},
   {id:'f7',type:'food',name:'SNS 화제 빙수카페',dong:'강변동',x:11,y:10.6,indoor:true,stairs:0,price:9000,rating:5.0,reviews:6,crowd:[35,30],tags:['사진','비건','아이','부드러움'],desc:'사진이 예쁘기로 소문난 카페라고 해요.',fake:true},
   {id:'f8',type:'food',name:'계단 위 국수집',dong:'산마루동',x:18.6,y:5.6,indoor:true,stairs:2,price:7000,rating:4.7,reviews:890,crowd:[65,35],tags:['한식','경치'],desc:'계단 120개를 올라가야 나오는 산꼭대기 국수집.',
-   say:[[5,'산꼭대기에서 먹는 국수 맛이 꿀맛!'],[1,'계단 120개… 다리가 후들거려요.'],[4,'멸치 육수가 진해요.']]}
+   say:[[5,'산꼭대기에서 먹는 국수 맛이 꿀맛!'],[1,'계단 120개… 다리가 후들거려요.'],[4,'멸치 육수가 진해요.']]},
+  /* few: 리뷰가 1~2개뿐인 함정 (광고는 아니지만 데이터가 너무 적고 오래됨). say = [별, 내용, 작성일, 작성자 리뷰 수], twist = 실제로 가 보면 */
+  {id:'s9',type:'sight',name:'숲속 조각공원',dong:'하늘동',x:2.5,y:6.6,indoor:false,stairs:0,price:0,rating:5.0,reviews:1,crowd:[10,15],tags:['역사','사진','아이','자연'],desc:'숲길을 따라 조각 작품이 놓인 조용한 공원이라고 해요.',few:true,
+   say:[[5,'조용하고 작품이 정말 좋아요. 숨은 보석 같은 곳!','2023.05.14',3]],
+   twist:'🚧 공원 절반이 공사 중이라 막혀 있었어요. 하나뿐인 리뷰는 3년 전 것이었네요….'},
+  {id:'f9',type:'food',name:'동네 비건 분식',dong:'강변동',x:2.2,y:13,indoor:true,stairs:0,price:6000,rating:4.5,reviews:2,crowd:[20,20],tags:['비건','부드러움','아이','한식'],desc:'비건 떡볶이와 순한 김밥을 파는 작은 분식집이라고 해요.',few:true,
+   say:[[5,'비건 떡볶이 최고! 아이도 잘 먹어요.','2025.03.02',12],[4,'양이 많고 부드러워요.','2025.02.20',5]],
+   twist:'😕 주인이 바뀌어서 메뉴도 맛도 리뷰와 딴판이었어요. 리뷰 2개가 1년도 더 전 것이었어요.'}
 ];
 
 /* 공통 리뷰 (장소별 say 리뷰에 섞임). good = 4~5점, mid = 3점, bad = 1~2점
@@ -404,9 +411,10 @@ function evaluate(c,plan){
     return {label:q.label,ok:pool.filter(p=>p.tags.some(t=>q.tags.includes(t))).length>=(q.min||1)};});
   add('interest','취향',ir.every(r=>r.ok),ir.map(r=>(r.ok?'✔ ':'✘ ')+r.label).join(' / '));
 
-  P.forEach((p,i)=>{if(p.fake) notes[i].push('😑 사진과 완전히 달라요. 리뷰를 믿었는데….');});
-  const ff=P.filter(p=>p.fake);
-  add('verify','검증',!ff.length,ff.map(p=>`${p.name}: 리뷰 ${p.reviews}개가 모두 사흘 사이에 몰려 올라온 광고성 리뷰`).join(' / ')||'검증되지 않은 장소는 고르지 않았어요.');
+  P.forEach((p,i)=>{if(p.fake) notes[i].push('😑 사진과 완전히 달라요. 리뷰를 믿었는데….'); if(p.few) notes[i].push(p.twist);});
+  const ff=P.filter(p=>p.fake||p.few);
+  add('verify','검증',!ff.length,ff.map(p=>p.fake?`${p.name}: 리뷰 ${p.reviews}개가 모두 사흘 사이에 몰려 올라온 광고성 리뷰`
+    :`${p.name}: 리뷰가 ${p.reviews}개뿐이고 마지막 리뷰가 ${p.say[0][2]}`).join(' / ')||'검증되지 않은 장소는 고르지 않았어요.');
 
   P.forEach((p,i)=>{if(!notes[i].length) notes[i].push(p.tags.some(t=>c.interest.some(q=>q.tags.includes(t)))?'😊 정말 좋았어요!':p.type==='food'?'😋 맛있게 잘 먹었어요.':'🙂 무난했어요.');});
   return {crit,notes,cost,km,fake:ff.length>0,score:crit.reduce((s,k)=>s+k.pts,0)};
@@ -485,6 +493,7 @@ function rng(seed){let s=seed;return()=>(s=(s*9301+49297)%233280)/233280;}
 function reviewsOf(p){
   const r=rng([...p.id].reduce((s,c)=>s*31+c.charCodeAt(0),7)%233280);
   if(p.fake) return REVIEWS.fake.slice(0,p.reviews).map(([star,t],i)=>({star,t,d:REVIEWS.fakeDates[i],n:1}));
+  if(p.few) return p.say.map(([star,t,d,n])=>({star,t,d,n}));
   const L=(p.say||[]).map(([star,t])=>({star,t})), low=(5-p.rating)*0.25;
   for(let k=0;L.length<8&&k<200;k++){
     const x=r(), mood=x<low?'bad':x<low+0.2?'mid':'good', pool=REVIEWS[p.type][mood], t=pool[Math.floor(r()*pool.length)];
@@ -614,7 +623,7 @@ function openModal(html,onBind){
 }
 function openReviews(p){
   openModal(`<h3>${p.name} · 리뷰 원자료</h3>
-    <p class="muted" style="font-size:13px">${p.fake?`전체 ${p.reviews}개`:`전체 ${p.reviews.toLocaleString()}개 중 최근 8개`} · 작성일, 작성자, 내용을 살펴보세요.</p>
+    <p class="muted" style="font-size:13px">${p.fake||p.few?`전체 ${p.reviews}개`:`전체 ${p.reviews.toLocaleString()}개 중 최근 8개`} · 작성일, 작성자, 내용을 살펴보세요.</p>
     <div>${reviewsOf(p).map(r=>`<div class="rv"><span class="m">${r.d} · 작성자 리뷰 ${r.n}개 · <span class="${r.star<=2?'no':''}">${'★'.repeat(r.star)}${'☆'.repeat(5-r.star)}</span></span><span>${r.t}</span></div>`).join('')}</div>
     <div class="row"><button class="btn" data-focus id="mc">닫기</button></div>`,close=>$('#mc').onclick=close);
 }
