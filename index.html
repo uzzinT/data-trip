@@ -318,7 +318,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const won=n=>n.toLocaleString('ko-KR')+'원';
 const crowdOf=(p,slot)=>p.crowd[slot<2?0:1];
 
-const S={name:'',ci:0,plan:[null,null,null,null],sel:null,priv:[],usedAI:[],results:[],notes:[],tab:'map',sort:''};
+const S={name:'',ci:0,plan:[null,null,null,null],sel:null,priv:[],aiPicks:[],results:[],notes:[],tab:'map',sort:''};
 
 function show(id){
   document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==id);
@@ -341,7 +341,11 @@ function evaluate(c,plan){
   P.forEach((p,i)=>{const b=bad(i); if(!p.indoor&&b){
     wf.push(`${SLOTS[i].name} ${p.name}: ${b==='rain'?'강수확률 '+c.weather[i].rain+'%':'체감온도 '+c.weather[i].feel+'℃'}인데 실외`);
     notes[i].push(b==='rain'?'☔ 비가 쏟아져서 흠뻑 젖었어요.':'🥵 너무 더워서 모두 지쳤어요.');}});
-  add('weather','날씨',!wf.length,wf.join(' / ')||'비·폭염 시간대에는 실내 장소를 골랐어요.');
+  // 통과 문구는 실제로 고른 장소를 그대로 말해야 함 (실외를 골랐는데 "실내를 골랐다"고 하지 않게)
+  const badSlots=SLOTS.filter((s,i)=>bad(i)).map(s=>s.name), outGood=P.filter((p,i)=>!p.indoor&&!bad(i)).map(p=>p.name);
+  add('weather','날씨',!wf.length,wf.join(' / ')||[
+    badSlots.length?`비·폭염인 ${badSlots.join('·')}에는 실내 장소를 골랐어요.`:'날씨가 나쁜 시간대가 없었어요.',
+    outGood.length?`실외 장소(${outGood.join(', ')})는 날씨가 괜찮은 시간에 갔어요.`:''].join(' ').trim());
 
   const mf=[];
   P.forEach((p,i)=>{if(p.stairs>c.maxStairs){mf.push(`${p.name}: ${STAIRS[p.stairs]}`);notes[i].push('😣 계단이 많아서 너무 힘들었어요.');}});
@@ -380,6 +384,8 @@ function aiPlan(){
   const s=top('sight'), f=top('food');
   return [s[0].id,f[0].id,s[1].id,f[1].id];
 }
+// AI 추천을 받았어도, 추천 장소를 모두 지우거나 바꿨으면 "안 쓴 것"으로 봄
+const usedAI=()=>!!S.aiPicks[S.ci]&&S.plan.some((id,i)=>id===S.aiPicks[S.ci][i]);
 
 /* ---------- 지도 그리기 ---------- */
 function setupCanvas(cv){
@@ -458,7 +464,7 @@ function reviewsOf(p){
 /* ---------- 계획 화면 ---------- */
 let mapCtx;
 function startClient(i){
-  S.ci=i;S.plan=[null,null,null,null];S.sel=null;S.usedAI[i]=false;
+  S.ci=i;S.plan=[null,null,null,null];S.sel=null;S.aiPicks[i]=null;
   setTip(i===0?'의뢰서를 읽고, 날씨 데이터와 장소 데이터를 보면서 네 칸을 채워 보세요. 지도의 장소를 누르면 데이터가 나와요.':'새 의뢰가 들어왔어요! 이번 의뢰인의 조건은 무엇이 다를까요?');
   show('sc-plan');renderPlan();
 }
@@ -611,7 +617,7 @@ function starsOf(ev,priv){
 function renderResult(){
   const c=CLIENTS[S.ci], ev=S.last, priv=!!S.priv[S.ci], st=starsOf(ev,priv);
   const sat=Math.max(1,Math.round(ev.score/20)), q=c.quotes[ev.score>=90?0:ev.score>=60?1:2];
-  S.results[S.ci]={score:ev.score,stars:st.filter(Boolean).length,priv,ai:S.usedAI[S.ci]};
+  S.results[S.ci]={score:ev.score,stars:st.filter(Boolean).length,priv,ai:usedAI()};
   const last=S.ci===CLIENTS.length-1;
   $('#sc-result').innerHTML=`
     <div class="card review">
@@ -629,7 +635,7 @@ function renderResult(){
       <div class="tablebox"><table><thead><tr><th>항목</th><th>결과</th><th>점수</th><th>까닭</th></tr></thead><tbody>
         ${ev.crit.map(k=>`<tr><td><b>${k.name}</b></td><td class="${k.ok?'ok':'no'}">${k.ok?'✔':'✘'}</td><td class="mono">${k.pts}/${k.max}</td><td class="why">${esc(k.why)}</td></tr>`).join('')}
       </tbody></table></div>
-      <p class="muted" style="font-size:13px">이동 ${ev.km} km · 비용 ${won(ev.cost)}${S.usedAI[S.ci]?' · 🤖 AI 추천 코스를 썼어요':''}</p>
+      <p class="muted" style="font-size:13px">이동 ${ev.km} km · 비용 ${won(ev.cost)}${usedAI()?' · 🤖 AI 추천 코스를 썼어요':''}</p>
     </div>
     <div class="card">
       <h3>플래너 별점 ${'★'.repeat(st.filter(Boolean).length)}${'☆'.repeat(3-st.filter(Boolean).length)}</h3>
@@ -638,7 +644,7 @@ function renderResult(){
         <li><span class="${st[1]?'ok':'no'}">${st[1]?'★':'☆'}</span> 만족도 80점 이상</li>
         <li><span class="${st[2]?'ok':'no'}">${st[2]?'★':'☆'}</span> 동의 없는 개인정보를 보지 않고, 검증되지 않은 장소를 고르지 않음</li>
       </ul>
-      ${S.usedAI[S.ci]?`<p class="tip warn">🤖 나래: 제 추천은 <b>평점 순서</b>로만 골랐어요. 의뢰인의 조건은 보지 않았죠. 데이터와 AI를 지나치게 믿으면 이렇게 될 수 있어요.</p>`:''}
+      ${usedAI()?`<p class="tip warn">🤖 나래: 제 추천은 <b>평점 순서</b>로만 골랐어요. 의뢰인의 조건은 보지 않았죠. 데이터와 AI를 지나치게 믿으면 이렇게 될 수 있어요.</p>`:''}
     </div>
     <div class="card">
       <h3>데이터 → 정보 → 지식</h3>
@@ -659,7 +665,7 @@ function renderResult(){
     </div>`;
   show('sc-result');
   $('#note').oninput=e=>S.notes[S.ci]=e.target.value;
-  $('#retry').onclick=()=>{const keep=S.plan,ai=S.usedAI[S.ci];startClient(S.ci);S.plan=[...keep];S.usedAI[S.ci]=ai;renderPlan();setTip('후기에서 ✘가 나온 항목을 데이터에서 다시 확인해 보세요.');};
+  $('#retry').onclick=()=>{const keep=S.plan,ai=S.aiPicks[S.ci];startClient(S.ci);S.plan=[...keep];S.aiPicks[S.ci]=ai;renderPlan();setTip('후기에서 ✘가 나온 항목을 데이터에서 다시 확인해 보세요.');};
   $('#next').onclick=()=>last?renderFinal():startClient(S.ci+1);
 }
 
@@ -719,7 +725,7 @@ $('#map').onclick=e=>{
   let best=null,bd=28; PLACES.forEach(p=>{const d=Math.hypot(p.x*CELL-x,p.y*CELL-y);if(d<bd){bd=d;best=p;}});
   if(best) select(best.id);
 };
-$('#ai').onclick=()=>{S.plan=aiPlan();S.usedAI[S.ci]=true;renderPlan();
+$('#ai').onclick=()=>{S.aiPicks[S.ci]=aiPlan();S.plan=[...S.aiPicks[S.ci]];renderPlan();
   setTip('평점이 가장 높은 곳으로 골랐어요! …그런데 의뢰인 조건은 따로 확인하지 않았어요.',true);};
 $('#send').onclick=runSim;
 $('#skip').onclick=()=>simEnd&&simEnd();
