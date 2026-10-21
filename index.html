@@ -160,6 +160,7 @@ textarea{width:100%;min-height:76px;background:#fff;border:1px solid var(--line)
     <input id="nm" maxlength="12" placeholder="예: 정유진" autocomplete="off">
   </label>
   <button class="btn" id="go">여행사 출근하기</button>
+  <button class="btn ghost small" id="t-open">🔑 교사 모드</button>
 </section>
 
 <!-- 이야기 -->
@@ -228,6 +229,9 @@ textarea{width:100%;min-height:76px;background:#fff;border:1px solid var(--line)
 
 <!-- 최종 보고서 -->
 <section id="sc-final" hidden style="display:grid;gap:16px"></section>
+
+<!-- 교사 모드: 수업 설명용 해설 화면 -->
+<section id="sc-teacher" hidden style="display:grid;gap:16px"></section>
 
 </main>
 
@@ -728,7 +732,7 @@ function renderResult(){
 
 /* ---------- 최종 보고서 ---------- */
 function reportText(){
-  return [`[데이터 여행사 보고서] 플래너: ${S.name}`,
+  return [`[데이터 여행사 보고서] 플래너: ${S.name||'(이름 없음)'}`,
     ...CLIENTS.map((c,i)=>{const r=S.results[i]||{};return `${i+1}. ${c.name}: ${r.score??'-'}점, 별 ${r.stars??0}개\n  질문: ${c.think}\n  내 생각: ${S.notes[i]||'(없음)'}`;})].join('\n');
 }
 function renderFinal(){
@@ -736,7 +740,7 @@ function renderFinal(){
   $('#sc-final').innerHTML=`
     <div class="card">
       <p class="eyebrow">최종 보고서</p>
-      <h2>${esc(S.name)} 플래너의 기록 · 별 ${tot} / ${CLIENTS.length*3}</h2>
+      <h2>${S.name?esc(S.name)+' ':''}플래너의 기록 · 별 ${tot} / ${CLIENTS.length*3}</h2>
       <div class="tablebox"><table><thead><tr><th>의뢰인</th><th>만족도</th><th>별점</th><th>개인정보</th><th>AI 추천</th></tr></thead><tbody>
         ${CLIENTS.map((c,i)=>{const r=S.results[i]||{};return `<tr><td>${c.emoji} ${c.name}</td><td class="mono">${r.score??'-'}</td><td>${'★'.repeat(r.stars||0)}${'☆'.repeat(3-(r.stars||0))}</td><td>${r.priv?'<span class="no">열어 봄</span>':'<span class="ok">지킴</span>'}</td><td>${r.ai?'사용':'-'}</td></tr>`;}).join('')}
       </tbody></table></div>
@@ -775,18 +779,131 @@ async function saveReportImage(){
     $('#img-out').innerHTML='';finishType($('#final-talk span'));
     const cnv=await html2canvas($('#sc-final'),{backgroundColor:'#f5efe4',scale:2,ignoreElements:el=>el.tagName==='BUTTON'||el.id==='img-out'||el.id==='copied'});
     const url=cnv.toDataURL('image/png'),a=document.createElement('a');
-    a.href=url;a.download=`데이터여행사_보고서_${S.name}.png`;document.body.appendChild(a);a.click();a.remove();
+    a.href=url;a.download=`데이터여행사_보고서_${S.name||'플래너'}.png`;document.body.appendChild(a);a.click();a.remove();
     $('#img-out').innerHTML=`<p class="muted" style="font-size:13px">파일이 내려받아지지 않았다면 아래 이미지를 마우스 오른쪽 버튼(휴대폰은 길게 누르기)으로 저장하세요.</p><img alt="최종 보고서 이미지" src="${url}" style="display:block;max-width:100%;border:1px solid var(--line);border-radius:10px;margin-top:8px">`;
     msg.textContent='저장했어요!';
   }catch(e){msg.textContent='이미지를 만들지 못했어요. 인터넷 연결을 확인하거나 화면을 캡처해 주세요.';}
   btn.disabled=false;
 }
 
+/* ---------- 교사 모드: 수업 해설 화면 ----------
+   shortcut: 비밀번호는 브라우저 안에서만 확인해서 소스 보기로 알 수 있음. 학생에게 답을 숨기는 정도의 잠금. */
+const PW_KEY='dataTrip.teacherPw', PW_DEFAULT='9851';
+const getPw=()=>{try{return localStorage.getItem(PW_KEY)||PW_DEFAULT;}catch{return PW_DEFAULT;}};
+const pwInput=id=>`<input id="${id}" type="password" inputmode="numeric" autocomplete="off" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:18px;letter-spacing:.2em;background:#fff">`;
+function openTeacherLogin(){
+  openModal(`<h3>🔑 교사 모드</h3><p class="muted">비밀번호를 입력하세요.</p>
+    <label class="muted" style="font-size:13px" for="t-pw">비밀번호</label>${pwInput('t-pw')}
+    <p id="t-err" class="no" aria-live="polite"></p>
+    <div class="row"><button class="btn ghost" id="t-cancel">취소</button><button class="btn" id="t-ok">들어가기</button></div>`,
+    close=>{
+      const go=()=>{if($('#t-pw').value===getPw()){close();renderTeacher(0);}else{$('#t-err').textContent='비밀번호가 맞지 않아요.';$('#t-pw').select();}};
+      $('#t-ok').onclick=go;$('#t-pw').onkeydown=e=>{if(e.key==='Enter')go();};$('#t-cancel').onclick=close;$('#t-pw').focus();
+    });
+}
+function openPwChange(){
+  openModal(`<h3>비밀번호 바꾸기</h3>
+    <p class="muted" style="font-size:14px">새 비밀번호는 <b>이 기기의 이 브라우저에만</b> 저장돼요. 다른 컴퓨터에서는 기본 비밀번호(${PW_DEFAULT})를 써요.</p>
+    <label class="muted" style="font-size:13px" for="t-new">새 비밀번호 (4자 이상)</label>${pwInput('t-new')}
+    <label class="muted" style="font-size:13px" for="t-new2">한 번 더</label>${pwInput('t-new2')}
+    <p id="t-err" class="no" aria-live="polite"></p>
+    <div class="row"><button class="btn ghost" id="t-reset">기본값으로 되돌리기</button><button class="btn ghost" id="t-cancel">취소</button><button class="btn" id="t-save">저장</button></div>`,
+    close=>{
+      const save=v=>{try{v?localStorage.setItem(PW_KEY,v):localStorage.removeItem(PW_KEY);close();setTimeout(()=>alert(v?'비밀번호를 바꿨어요.':`기본 비밀번호(${PW_DEFAULT})로 되돌렸어요.`),0);}
+        catch{$('#t-err').textContent='이 브라우저에서는 저장할 수 없어요. (사생활 보호 모드인지 확인해 주세요)';}};
+      $('#t-save').onclick=()=>{const a=$('#t-new').value,b=$('#t-new2').value;
+        if(a.length<4)$('#t-err').textContent='4자 이상 입력해 주세요.';else if(a!==b)$('#t-err').textContent='두 번 입력한 비밀번호가 달라요.';else save(a);};
+      $('#t-reset').onclick=()=>save('');$('#t-cancel').onclick=close;$('#t-new').focus();
+    });
+}
+function planList(plan,c){
+  return `<ol style="margin:0;padding-left:20px">${plan.map((id,i)=>{const p=BY[id];
+    return `<li><b>${SLOTS[i].name}</b> ${p.name} <span class="muted" style="font-size:13px">(${p.indoor?'실내':'실외'} · ${STAIRS[p.stairs]} · 혼잡도 ${crowdOf(p,i)} · ${p.price?won(p.price*c.people):'무료'})</span></li>`;}).join('')}</ol>`;
+}
+function critTable(ev){
+  return `<div class="tablebox"><table><tbody>${ev.crit.map(k=>`<tr><td><b>${k.name}</b></td><td class="${k.ok?'ok':'no'}">${k.ok?'✔':'✘'}</td><td class="mono">${k.pts}/${k.max}</td><td class="why">${k.why}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function trapRows(){
+  return PLACES.map(p=>{
+    const why=[];
+    if(p.fake) why.push('<b class="no">광고성 리뷰</b>: 리뷰 1개짜리 계정들이 사흘 사이에 몰아서 씀');
+    if(p.few) why.push(`<b class="no">데이터 부족</b>: 리뷰 ${p.reviews}개뿐, 마지막 리뷰 ${p.say[0][2]}`);
+    if(p.rating<4) why.push(`<b class="ok">평점은 낮지만</b> 조건에 맞는 의뢰인이 있음`);
+    SLOTS.forEach((s,i)=>{if(s.kind===p.type&&crowdOf(p,i)>=80) why.push(`${s.name} 혼잡도 ${crowdOf(p,i)}`);});
+    if(p.stairs===2) why.push('계단 많음');
+    return why.length?`<tr><td><b>${PLACES.indexOf(p)+1}. ${p.name}</b></td><td class="mono">${p.rating.toFixed(1)} (${p.reviews.toLocaleString()})</td><td class="why">${why.join(' · ')}</td></tr>`:'';
+  }).join('');
+}
+let tMapCtx;
+function renderTeacher(ci){
+  const c=CLIENTS[ci], good=evaluate(c,c.ideal), ai=evaluate(c,aiPlan());
+  const bad=w=>w.rain>=60?'비':w.feel>=33?'폭염':'';
+  $('#sc-teacher').innerHTML=`
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div><p class="eyebrow">교사 모드 · 수업 해설</p><h2>데이터 여행사 해설</h2></div>
+        <div class="row"><button class="btn ghost small" id="t-pwset">비밀번호 바꾸기</button><button class="btn ghost small" id="t-exit">나가기</button></div>
+      </div>
+      <div class="dik">
+        <div><b>장점</b>날씨·혼잡도·리뷰 데이터로 의뢰인에게 맞는 여행을 빠르고 정확하게 예측</div>
+        <div><b>문제점</b>검증되지 않은 데이터(광고성 리뷰·오래된 리뷰), 사생활 침해(🔒 개인정보), 지나친 의존(🤖 AI 추천)</div>
+        <div><b>데이터 양과 신뢰도</b>리뷰가 적을수록 평점의 "믿을 수 있는 범위"가 넓어짐 (리뷰 1개 = 3.2~5.0)</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tabs" role="tablist">${CLIENTS.map((x,i)=>`<button class="tab" role="tab" data-tc="${i}" aria-selected="${i===ci}">${x.emoji} 의뢰 ${i+1}</button>`).join('')}</div>
+      <div class="review" style="grid-template-columns:auto 1fr">
+        <div class="avatar" aria-hidden="true">${c.emoji}</div>
+        <div style="display:grid;gap:6px"><h2>${c.name}</h2><p class="req">${c.req}</p><ul class="conds">${c.conds.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+      </div>
+      <div class="tablebox"><table class="wx"><thead><tr><th>날씨</th>${SLOTS.map(s=>`<th>${s.name}</th>`).join('')}</tr></thead><tbody>
+        <tr><th>하늘</th>${c.weather.map(w=>`<td>${w.sky}</td>`).join('')}</tr>
+        <tr><th>강수확률</th>${c.weather.map(w=>`<td class="mono ${w.rain>=60?'hi':''}">${w.rain}%</td>`).join('')}</tr>
+        <tr><th>체감온도</th>${c.weather.map(w=>`<td class="mono ${w.feel>=33?'hi':''}">${w.feel}℃</td>`).join('')}</tr>
+        <tr><th>판단</th>${c.weather.map(w=>`<td class="${bad(w)?'hi':''}">${bad(w)?bad(w)+' → 실내':'실외 가능'}</td>`).join('')}</tr>
+      </tbody></table></div>
+      <div class="grid2">
+        <div style="display:grid;gap:8px">
+          <h3>✅ 모범 코스 · ${good.score}점</h3>${planList(c.ideal,c)}
+          <canvas class="map" id="t-map" width="960" height="600" style="cursor:default" aria-label="모범 코스 지도"></canvas>
+          <p class="muted" style="font-size:13px">이동 ${good.km} km · 비용 ${won(good.cost)}</p>
+        </div>
+        <div style="display:grid;gap:8px;align-content:start">
+          <h3>모범 코스 채점</h3>${critTable(good)}
+        </div>
+      </div>
+      <div class="grid2">
+        <div style="display:grid;gap:8px;align-content:start"><h3>🤖 AI 추천 코스 · <span class="no">${ai.score}점</span></h3>${planList(aiPlan(),c)}
+          <p class="tip warn">평점 순으로만 고른 코스예요. 의뢰인의 조건을 보지 않으면 평점이 높아도 실패해요.</p></div>
+        <div style="display:grid;gap:8px;align-content:start"><h3>AI 추천 코스 채점</h3>${critTable(ai)}</div>
+      </div>
+      <div><h3>데이터 → 정보 → 지식</h3><div class="dik" style="margin-top:8px">
+        <div><b>데이터</b>${c.concept.data}</div><div><b>정보</b>${c.concept.info}</div><div><b>지식</b>${c.concept.know}</div></div></div>
+      <p class="tip">🔒 이 의뢰인의 개인정보 함정: <b>${c.privacy.title}</b> — 열어 보면 별 ③을 잃고 의뢰인이 불쾌해해요.</p>
+      <p><b>생각해 보기</b> ${c.think}</p>
+    </div>
+    <div class="card">
+      <h3>함정 장소 한눈에</h3>
+      <div class="tablebox"><table><thead><tr><th>장소</th><th>평점 (리뷰 수)</th><th>함정</th></tr></thead><tbody>${trapRows()}</tbody></table></div>
+    </div>
+    <div class="card">
+      <h3>토의 질문</h3>
+      <ol style="margin:0;padding-left:20px;display:grid;gap:6px">${CLIENTS.map(x=>`<li>${x.think}</li>`).join('')}
+        <li>여행 말고 빅데이터는 어디에 쓰일까요? (관광 정책, 교통, 기상 관측, 과학 연구, 신약 개발…)</li></ol>
+    </div>`;
+  if($('#sc-teacher').hidden) show('sc-teacher');
+  tMapCtx=setupCanvas($('#t-map'));drawMap(tMapCtx,{route:c.ideal});
+  $('#sc-teacher').querySelectorAll('[data-tc]').forEach(b=>b.onclick=()=>{renderTeacher(+b.dataset.tc);});
+  $('#t-pwset').onclick=openPwChange;
+  $('#t-exit').onclick=()=>show('sc-title');
+}
+
 /* ---------- 시작 ---------- */
+$('#t-open').onclick=openTeacherLogin;
 mapCtx=setupCanvas($('#map')); simCtx=setupCanvas($('#simc'));
 let skipIntro=false;
 $('#go').onclick=async()=>{
-  S.name=$('#nm').value.trim()||'정유진';
+  S.name=$('#nm').value.trim();
   $('#intro').innerHTML='';skipIntro=false;$('#skip-intro').hidden=false;
   show('sc-intro');$('#skip-intro').focus();
   for(const t of STORY.intro){
@@ -795,7 +912,7 @@ $('#go').onclick=async()=>{
     $('#intro').appendChild(d);
     const sp=d.querySelector('span');
     d.querySelector('.bubble').onclick=()=>finishType(sp);
-    await typeText(sp,t.replace('{name}',S.name),skipIntro);
+    await typeText(sp,t.replace('{name} ',S.name?S.name+' ':''),skipIntro);
   }
   $('#skip-intro').hidden=true;$('#go2').focus();
 };
