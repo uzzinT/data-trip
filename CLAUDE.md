@@ -45,3 +45,7 @@
 
 - 저장소: https://github.com/uzzinT/data-trip (공개). `main`에 올리면 GitHub Pages(https://uzzint.github.io/data-trip/)에 1~2분 뒤 반영.
 - 수정 후 브라우저에서 의뢰 3개 → 최종 보고서까지 직접 플레이해 확인.
+
+## 작업 마무리 규칙
+
+- 작업이 끝나면 작업한 브랜치를 `main`에 머지하고, `main`을 GitHub에 push까지 한다. 사용자가 따로 요청하지 않아도 이렇게 한다.
